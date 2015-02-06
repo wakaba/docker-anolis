@@ -1,0 +1,23 @@
+docker-anolis
+~~~~~~~~~~~~~
+
+A Dockerfile for Anolis.
+
+* Usage
+
+  $ docker run -i wakaba/docker-anolis [OPTIONS] < input.html.src > output.html
+
+* Repository
+
+GitHub <https://github.com/wakaba/docker-anolis>.
+
+Docker Hub <https://registry.hub.docker.com/u/wakaba/docker-anolis/>.
+
+* See also
+
+Anolis <https://wiki.whatwg.org/wiki/Anolis>,
+<http://bitbucket.org/ms2ger/anolis>.
+
+* License
+
+The files in this Git repository are in the Public Domain.
