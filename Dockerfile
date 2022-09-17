@@ -1,8 +1,13 @@
-FROM debian:sid
+FROM python:2.7.10
 
-RUN apt-get update
-RUN apt-get -y install mercurial python-lxml python-cssselect python-setuptools
-RUN easy_install html5lib
+ADD Makefile /app/
+ADD anolis /app/anolis
+ADD requirements.txt /app/requirements.txt
 
-RUN hg clone http://bitbucket.org/ms2ger/anolis
-RUN cd anolis && python setup.py install
+RUN cd /app && \
+    apt-get update && \
+    make deps-docker && \
+    pip install -r requirements.txt && \
+    rm -rf /var/lib/apt/lists/* deps
+
+CMD /app/anolis/anolis

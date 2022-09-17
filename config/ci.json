@@ -1,0 +1,6 @@
+{
+  "circleci": {
+    "build": ["make deps-circleci"],
+    "docker-build": "quay.io/wakaba/anolis"
+  }
+}

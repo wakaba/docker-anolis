@@ -1,0 +1,120 @@
+{
+   "jobs" : {
+      "build" : {
+         "environment" : {
+            "CIRCLE_ARTIFACTS" : "/tmp/circle-artifacts/build"
+         },
+         "machine" : {
+            "image" : "ubuntu-2004:202101-01"
+         },
+         "steps" : [
+            "checkout",
+            {
+               "run" : {
+                  "command" : "mkdir -p $CIRCLE_ARTIFACTS"
+               }
+            },
+            {
+               "run" : {
+                  "command" : "make deps-circleci"
+               }
+            },
+            {
+               "run" : {
+                  "command" : "docker info"
+               }
+            },
+            {
+               "run" : {
+                  "command" : "docker build -t quay.io/wakaba/anolis ."
+               }
+            },
+            {
+               "store_artifacts" : {
+                  "path" : "/tmp/circle-artifacts/build"
+               }
+            },
+            {
+               "run" : {
+                  "command" : "mkdir -p .ciconfigtemp/dockerimages/quay.io/wakaba/"
+               }
+            },
+            {
+               "run" : {
+                  "command" : "docker save -o .ciconfigtemp/dockerimages/quay.io/wakaba/anolis.tar quay.io/wakaba/anolis"
+               }
+            },
+            {
+               "persist_to_workspace" : {
+                  "paths" : [
+                     ".ciconfigtemp"
+                  ],
+                  "root" : "./"
+               }
+            }
+         ]
+      },
+      "deploy_master" : {
+         "machine" : {
+            "image" : "ubuntu-2004:202101-01"
+         },
+         "steps" : [
+            "checkout",
+            {
+               "attach_workspace" : {
+                  "at" : "./"
+               }
+            },
+            {
+               "run" : {
+                  "command" : "docker load -i .ciconfigtemp/dockerimages/quay.io/wakaba/anolis.tar"
+               }
+            },
+            {
+               "deploy" : {
+                  "command" : "docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS quay.io || docker login -u $DOCKER_USER -p $DOCKER_PASS quay.io"
+               }
+            },
+            {
+               "deploy" : {
+                  "command" : "docker push quay.io/wakaba/anolis"
+               }
+            },
+            {
+               "deploy" : {
+                  "command" : "curl -sSf $BWALLER_URL | BWALL_GROUP=docker BWALL_NAME=quay.io/wakaba/anolis bash"
+               }
+            }
+         ]
+      }
+   },
+   "version" : 2,
+   "workflows" : {
+      "build" : {
+         "jobs" : [
+            {
+               "build" : {
+               }
+            },
+            {
+               "deploy_master" : {
+                  "context" : [
+                     "deploy-context"
+                  ],
+                  "filters" : {
+                     "branches" : {
+                        "only" : [
+                           "master"
+                        ]
+                     }
+                  },
+                  "requires" : [
+                     "build"
+                  ]
+               }
+            }
+         ]
+      },
+      "version" : 2
+   }
+}
